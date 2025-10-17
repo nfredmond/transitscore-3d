@@ -1,9 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 export interface AnalyzedSite {
   id?: string
@@ -26,6 +28,11 @@ export interface AmenityCache {
 }
 
 export async function logAnalyzedSite(site: AnalyzedSite) {
+  if (!supabase) {
+    console.warn('Supabase not configured')
+    return null
+  }
+  
   const { data, error } = await supabase
     .from('analyzed_sites')
     .insert([site])
@@ -40,6 +47,10 @@ export async function logAnalyzedSite(site: AnalyzedSite) {
 }
 
 export async function getCachedAmenities(lat: number, lng: number, type: string) {
+  if (!supabase) {
+    return null
+  }
+  
   const { data, error } = await supabase
     .from('amenity_cache')
     .select('*')
@@ -57,6 +68,10 @@ export async function getCachedAmenities(lat: number, lng: number, type: string)
 }
 
 export async function cacheAmenities(lat: number, lng: number, type: string, amenities: any) {
+  if (!supabase) {
+    return null
+  }
+  
   const { data, error } = await supabase
     .from('amenity_cache')
     .insert([{ lat, lng, amenity_type: type, amenities }])
