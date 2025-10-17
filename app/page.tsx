@@ -1,11 +1,21 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import AddressSearch from '@/components/AddressSearch'
-import MapView from '@/components/MapView'
 import ScoreDashboard from '@/components/ScoreDashboard'
-import ThreeDView from '@/components/ThreeDView'
 import { MapPin } from 'lucide-react'
+
+// Dynamically import map components with no SSR to avoid window issues
+const MapView = dynamic(() => import('@/components/MapView'), { 
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full">Loading map...</div>
+})
+
+const ThreeDView = dynamic(() => import('@/components/ThreeDView'), { 
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full">Loading 3D view...</div>
+})
 
 export default function Home() {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null)
