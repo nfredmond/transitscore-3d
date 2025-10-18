@@ -2,6 +2,12 @@
 
 All notable changes to TransitScore 3D will be documented in this file.
 
+## [Unreleased]
+
+No unreleased changes at this time. See version history below for recent updates.
+
+---
+
 ## [1.1.0] - 2025-10-18
 
 ### Added - User Experience

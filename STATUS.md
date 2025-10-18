@@ -1,24 +1,19 @@
 # TransitScore 3D - Project Status
 
-## Current Version
-
-**Production**: https://transitscore-3d.vercel.app
-
----
-
-## Deployment Status
+## Production Deployments
 
 ### Free Version
 - **URL**: https://transitscore-3d.vercel.app
 - **Branch**: `main`
 - **Auth Required**: No
+- **Monetization**: Venmo donations
 - **Status**: 🟢 Live and operational
 
-### Pro Version
+### Pro Version  
 - **Branch**: `paid-version`
 - **Auth Required**: Yes (Supabase)
 - **Billing**: $20/month (Stripe)
-- **Status**: Code complete, deploy to separate project when needed
+- **Status**: 🟢 Live and operational
 
 ---
 
@@ -39,11 +34,22 @@
 - ✅ Analysis wizard
 
 ### User Experience
-- ✅ Dark/light mode
+- ✅ Dark/light mode with smooth transitions
 - ✅ CARTO Voyager basemaps
 - ✅ Fullscreen maps
 - ✅ Professional PDF exports
-- ✅ Responsive design
+- ✅ Mobile-first responsive design
+- ✅ Multi-step loading progress indicators
+- ✅ Skeleton loading screens
+- ✅ Smooth animations and transitions
+- ✅ Scenario comparison (save & compare up to 3)
+
+### Performance & Reliability
+- ✅ API caching (24h geocoding, 6h amenities, 12h isochrones, 1h AI)
+- ✅ Rate limiting (30 requests per minute)
+- ✅ Auto-retry with exponential backoff
+- ✅ Error boundaries for graceful degradation
+- ✅ Parallel API calls for better performance
 
 ### Monetization
 - ✅ Venmo donations (free version)
@@ -73,22 +79,22 @@
 
 ---
 
-## Known Issues
-
-None currently reported.
-
----
-
 ## Roadmap
 
-### Potential Enhancements
+### Completed
+- ✅ Multi-scenario comparison
+- ✅ API caching
+- ✅ Rate limiting
+- ✅ Enhanced error handling
+
+### Planned Enhancements
 - Polygon drawing for custom building footprints
-- Multi-scenario comparison
 - Historical data tracking
 - Advanced zoning rule integration
 - Custom TDM program creation
 - Multi-site batch analysis
-- API rate limiting and caching improvements
+- Marker clustering for dense amenity areas
+- Advanced touch gestures for mobile
 
 ---
 
@@ -99,8 +105,15 @@ All documentation located in `docs/` folder:
 - `USER_GUIDE.md` - How to use the app
 - `ARCHITECTURE.md` - Technical architecture
 - `DEPLOYMENT.md` - Deployment guide
+- `NETWORK_ANALYSIS.md` - Network-based isochrone setup
+- `PAID_VERSION.md` - Paid version setup and configuration
 - `API.md` - API reference
 - `CONTRIBUTING.md` - Contribution guidelines
+
+Root documentation:
+- `README.md` - Project overview and quick start
+- `CHANGELOG.md` - Version history
+- `STATUS.md` - This file (current status)
 
 ---
 

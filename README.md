@@ -67,15 +67,18 @@ cp .env.local.example .env.local
 ```
 
 Edit `.env.local` with your credentials:
-```
+```bash
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
 
 # OpenRouteService API Key (Required for network-based isochrones)
+# See docs/NETWORK_ANALYSIS.md for setup instructions
 # Sign up for free at: https://openrouteservice.org/dev/#/signup
 OPENROUTE_SERVICE_API_KEY=your_ors_api_key
 ```
+
+**Important**: Without the OpenRouteService API key, the app will use approximate radius circles instead of true network-based routing. See [`docs/NETWORK_ANALYSIS.md`](docs/NETWORK_ANALYSIS.md) for setup instructions.
 
 4. Set up Supabase database:
 
@@ -133,11 +136,18 @@ npm run dev
 
 ## Documentation
 
-- **User Guide**: `docs/USER_GUIDE.md` - How to use the application
-- **Features**: `docs/FEATURES.md` - Complete feature list
-- **Architecture**: `docs/ARCHITECTURE.md` - Technical architecture
-- **Deployment**: `docs/DEPLOYMENT.md` - Deployment instructions
-- **API**: `docs/API.md` - API reference
+Complete documentation is located in the `docs/` folder:
+
+- **[User Guide](docs/USER_GUIDE.md)** - How to use the application
+- **[Features](docs/FEATURES.md)** - Complete feature list
+- **[Architecture](docs/ARCHITECTURE.md)** - Technical architecture and code organization
+- **[Deployment](docs/DEPLOYMENT.md)** - Deployment instructions and environment setup
+- **[Network Analysis](docs/NETWORK_ANALYSIS.md)** - Setting up network-based isochrones
+- **[Paid Version](docs/PAID_VERSION.md)** - Configuring the pro subscription version
+- **[API Reference](docs/API.md)** - API routes and usage
+- **[Contributing](docs/CONTRIBUTING.md)** - Contribution guidelines
+
+See **[docs/README.md](docs/README.md)** for the complete documentation index.
 
 ## Deployment
 
