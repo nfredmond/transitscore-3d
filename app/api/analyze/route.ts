@@ -36,14 +36,17 @@ export async function POST(request: NextRequest) {
       withinWalkDistance: amenities.filter((a: any) => a.distance < 800).length
     }
 
-    // Get AI recommendation using Claude
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: `You are an urban planning expert analyzing a development site in Sacramento, CA.
+    // Get AI recommendation using Claude (with error handling)
+    let recommendation
+    
+    try {
+      const message = await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'user',
+            content: `You are an urban planning expert analyzing a development site in California.
 
 Address: ${address}
 Walkability Score: ${walkabilityScore}/100
@@ -67,16 +70,14 @@ Format your response as JSON:
   "summary": "One compelling sentence summarizing why this site works for this density"
 }`
         }
-      ]
-    })
+          ]
+        })
 
-    // Parse AI response
-    const aiResponse = message.content[0].type === 'text' 
-      ? message.content[0].text 
-      : ''
-    
-    let recommendation
-    try {
+      // Parse AI response
+      const aiResponse = message.content[0].type === 'text' 
+        ? message.content[0].text 
+        : ''
+      
       // Extract JSON from response (handle potential markdown code blocks)
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
@@ -84,17 +85,18 @@ Format your response as JSON:
       } else {
         throw new Error('No JSON found in response')
       }
-    } catch (parseError) {
-      // Fallback recommendation if AI parsing fails
+    } catch (aiError) {
+      console.warn('AI analysis failed, using fallback:', aiError)
+      // Fallback recommendation if AI fails
       recommendation = {
-        suggestedUnits: Math.round(20 + (walkabilityScore + transitScore) / 10),
+        suggestedUnits: Math.round(20 + (walkabilityScore + bikeabilityScore + transitScore) / 15),
         recommendedHeight: transitScore > 60 ? 4 : 3,
         reasoning: [
-          'Good walkability provides daily amenity access',
-          'Transit connectivity supports higher density',
-          'Mixed-use potential enhances neighborhood vitality'
+          `Walkability score of ${walkabilityScore}/100 indicates ${walkabilityScore > 70 ? 'excellent' : 'good'} pedestrian access`,
+          `Bikeability score of ${bikeabilityScore}/100 shows ${bikeabilityScore > 60 ? 'strong' : 'moderate'} cycling infrastructure`,
+          `Transit score of ${transitScore}/100 ${transitScore > 50 ? 'supports' : 'suggests careful planning for'} higher density`
         ],
-        summary: 'This site supports moderate density development with strong walkability fundamentals.'
+        summary: `This site shows ${sustainabilityScore > 70 ? 'strong' : 'moderate'} multimodal potential with a sustainability score of ${sustainabilityScore}/100.`
       }
     }
 
