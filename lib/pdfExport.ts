@@ -130,7 +130,7 @@ export function generatePDF(data: ExportData) {
   doc.setFontSize(14)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
-  doc.text('🤖 AI-Powered Recommendation', 20, yPosition)
+  doc.text('AI-Powered Recommendation', 20, yPosition)
   
   yPosition += 8
   
@@ -162,12 +162,13 @@ export function generatePDF(data: ExportData) {
   })
   
   const categoryLabels: { [key: string]: string } = {
-    transit: '🚌 Transit Stops',
-    food: '🍽️ Food & Dining',
-    shopping: '🛒 Shopping',
-    education: '🎓 Education',
-    parks: '🌳 Parks & Recreation',
-    health: '⚕️ Healthcare'
+    transit: 'Transit Stops',
+    bikeway: 'Bikeways & Cycling',
+    food: 'Food & Dining',
+    shopping: 'Shopping',
+    education: 'Education',
+    parks: 'Parks & Recreation',
+    health: 'Healthcare'
   }
   
   // Create amenity summary table

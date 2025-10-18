@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import AddressSearch from '@/components/AddressSearch'
 import ScoreDashboard from '@/components/ScoreDashboard'
-import { MapPin, Moon, Sun } from 'lucide-react'
+import ScenarioPlanner from '@/components/ScenarioPlanner'
+import { MapPin, Moon, Sun, LayoutGrid } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 
 // Dynamically import map components with no SSR to avoid window issues
@@ -32,12 +33,15 @@ export default function Home() {
   const [amenities, setAmenities] = useState<any[]>([])
   const [scores, setScores] = useState<{
     walkability: number
+    bikeability: number
     transit: number
     density: number
     sustainability: number
   } | null>(null)
   const [recommendation, setRecommendation] = useState<string>('')
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d')
+  const [travelMode, setTravelMode] = useState<'walk' | 'bike'>('walk')
+  const [dashboardMode, setDashboardMode] = useState<'scores' | 'scenario'>('scores')
   const [buildingHeight, setBuildingHeight] = useState<number>(35)
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false)
 
@@ -95,6 +99,30 @@ export default function Home() {
               
               {coordinates && (
                 <>
+                  {/* Walk/Bike Mode Toggle */}
+                  <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+                    <button
+                      onClick={() => setTravelMode('walk')}
+                      className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors ${
+                        travelMode === 'walk'
+                          ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                          : 'text-gray-600 dark:text-gray-300'
+                      }`}
+                    >
+                      🚶 Walk
+                    </button>
+                    <button
+                      onClick={() => setTravelMode('bike')}
+                      className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors ${
+                        travelMode === 'bike'
+                          ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                          : 'text-gray-600 dark:text-gray-300'
+                      }`}
+                    >
+                      🚴 Bike
+                    </button>
+                  </div>
+                  
                   <button
                     onClick={() => setViewMode('2d')}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -139,6 +167,7 @@ export default function Home() {
                   coordinates={coordinates}
                   address={address}
                   amenities={amenities}
+                  travelMode={travelMode}
                   isFullscreen={isFullscreen}
                   onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
                 />
@@ -153,14 +182,51 @@ export default function Home() {
 
             {/* Dashboard - Takes up 1 column */}
             {!isFullscreen && (
-              <div className="lg:col-span-1">
-                <ScoreDashboard
-                  scores={scores}
-                  recommendation={recommendation}
-                  address={address}
-                  coordinates={coordinates}
-                  amenities={amenities}
-                />
+              <div className="lg:col-span-1 space-y-4">
+                {/* Dashboard Mode Toggle */}
+                <div className="flex bg-white dark:bg-gray-800 rounded-lg p-1 shadow-md">
+                  <button
+                    onClick={() => setDashboardMode('scores')}
+                    className={`flex-1 px-4 py-2 rounded-md font-medium text-sm transition-colors ${
+                      dashboardMode === 'scores'
+                        ? 'bg-sacramento-blue text-white'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    📊 Scores
+                  </button>
+                  <button
+                    onClick={() => setDashboardMode('scenario')}
+                    className={`flex-1 px-4 py-2 rounded-md font-medium text-sm transition-colors ${
+                      dashboardMode === 'scenario'
+                        ? 'bg-sacramento-blue text-white'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    🏗️ Scenario
+                  </button>
+                </div>
+
+                {/* Conditional Dashboard Content */}
+                {dashboardMode === 'scores' ? (
+                  <ScoreDashboard
+                    scores={scores}
+                    recommendation={recommendation}
+                    address={address}
+                    coordinates={coordinates}
+                    amenities={amenities}
+                    travelMode={travelMode}
+                  />
+                ) : (
+                  scores && (
+                    <ScenarioPlanner
+                      walkabilityScore={scores.walkability}
+                      bikeabilityScore={scores.bikeability}
+                      transitScore={scores.transit}
+                      travelMode={travelMode}
+                    />
+                  )
+                )}
               </div>
             )}
           </div>

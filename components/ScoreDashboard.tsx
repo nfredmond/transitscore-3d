@@ -6,6 +6,7 @@ import { generatePDF } from '@/lib/pdfExport'
 interface ScoreDashboardProps {
   scores: {
     walkability: number
+    bikeability: number
     transit: number
     density: number
     sustainability: number
@@ -14,9 +15,10 @@ interface ScoreDashboardProps {
   address: string
   coordinates?: { lat: number; lng: number }
   amenities?: any[]
+  travelMode?: 'walk' | 'bike'
 }
 
-export default function ScoreDashboard({ scores, recommendation, address, coordinates, amenities = [] }: ScoreDashboardProps) {
+export default function ScoreDashboard({ scores, recommendation, address, coordinates, amenities = [], travelMode = 'walk' }: ScoreDashboardProps) {
   if (!scores) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors">
@@ -46,11 +48,11 @@ export default function ScoreDashboard({ scores, recommendation, address, coordi
 
   const metrics = [
     {
-      label: 'Walkability',
-      score: scores.walkability,
+      label: travelMode === 'walk' ? 'Walkability' : 'Bikeability',
+      score: travelMode === 'walk' ? scores.walkability : scores.bikeability,
       icon: TrendingUp,
       color: 'bg-green-500',
-      description: 'Access to daily amenities'
+      description: travelMode === 'walk' ? 'Access to daily amenities on foot' : 'Cycling infrastructure & accessibility'
     },
     {
       label: 'Transit Access',
@@ -71,7 +73,7 @@ export default function ScoreDashboard({ scores, recommendation, address, coordi
       score: scores.sustainability,
       icon: Leaf,
       color: 'bg-emerald-500',
-      description: 'Environmental impact'
+      description: 'Combined multimodal score'
     }
   ]
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { calculateWalkabilityScore, calculateTransitScore } from '@/lib/utils'
+import { calculateWalkabilityScore, calculateBikeabilityScore, calculateTransitScore } from '@/lib/utils'
 import { logAnalyzedSite } from '@/lib/supabase'
 
 const anthropic = new Anthropic({
@@ -19,10 +19,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Calculate scores
+    // Calculate scores for both walking and biking
     const walkabilityScore = calculateWalkabilityScore(amenities)
+    const bikeabilityScore = calculateBikeabilityScore(amenities)
     const transitScore = calculateTransitScore(amenities)
-    const sustainabilityScore = Math.round((walkabilityScore + transitScore) / 2)
+    const sustainabilityScore = Math.round((walkabilityScore + bikeabilityScore + transitScore) / 3)
 
     // Prepare amenity summary for AI
     const amenitySummary = {
@@ -46,11 +47,12 @@ export async function POST(request: NextRequest) {
 
 Address: ${address}
 Walkability Score: ${walkabilityScore}/100
+Bikeability Score: ${bikeabilityScore}/100
 Transit Score: ${transitScore}/100
 Total Nearby Amenities: ${amenitySummary.total}
 Amenities by Category: ${JSON.stringify(amenitySummary.byCategory, null, 2)}
 Transit Stops within 400m: ${amenitySummary.nearbyTransit}
-Total Amenities within 800m: ${amenitySummary.withinWalkDistance}
+Total Amenities within 800m (walking): ${amenitySummary.withinWalkDistance}
 
 Based on this data, provide a density recommendation for this site. Include:
 1. Suggested number of residential units (considering the walkability and transit access)
@@ -111,6 +113,7 @@ Format your response as JSON:
     return NextResponse.json({
       scores: {
         walkability: walkabilityScore,
+        bikeability: bikeabilityScore,
         transit: transitScore,
         density: densityScore,
         sustainability: sustainabilityScore

@@ -10,11 +10,12 @@ interface MapViewProps {
   coordinates: { lat: number; lng: number }
   address: string
   amenities: any[]
+  travelMode?: 'walk' | 'bike'
   isFullscreen?: boolean
   onToggleFullscreen?: () => void
 }
 
-export default function MapView({ coordinates, address, amenities, isFullscreen = false, onToggleFullscreen }: MapViewProps) {
+export default function MapView({ coordinates, address, amenities, travelMode = 'walk', isFullscreen = false, onToggleFullscreen }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -45,12 +46,18 @@ export default function MapView({ coordinates, address, amenities, isFullscreen 
       }
     })
 
-    // Add walkability rings with shaded fills
-    const rings = [
-      { radius: 1200, color: '#0067B1', fillOpacity: 0.08, label: '15 min walk (1200m)' },
-      { radius: 800, color: '#FFB81C', fillOpacity: 0.12, label: '10 min walk (800m)' },
-      { radius: 400, color: '#10B981', fillOpacity: 0.15, label: '5 min walk (400m)' }
-    ]
+    // Add mode-appropriate rings with shaded fills
+    const rings = travelMode === 'walk' 
+      ? [
+          { radius: 1200, color: '#0067B1', fillOpacity: 0.08, label: '15 min walk (1200m)' },
+          { radius: 800, color: '#FFB81C', fillOpacity: 0.12, label: '10 min walk (800m)' },
+          { radius: 400, color: '#10B981', fillOpacity: 0.15, label: '5 min walk (400m)' }
+        ]
+      : [
+          { radius: 3000, color: '#0067B1', fillOpacity: 0.06, label: '15 min bike (3000m)' },
+          { radius: 2000, color: '#FFB81C', fillOpacity: 0.10, label: '10 min bike (2000m)' },
+          { radius: 1000, color: '#10B981', fillOpacity: 0.14, label: '5 min bike (1000m)' }
+        ]
 
     // Draw rings from largest to smallest so smaller rings appear on top
     rings.forEach((ring) => {
@@ -117,7 +124,7 @@ export default function MapView({ coordinates, address, amenities, isFullscreen 
         mapRef.current = null
       }
     }
-  }, [coordinates, address, amenities])
+  }, [coordinates, address, amenities, travelMode])
 
   return (
     <div className="relative w-full h-full">
@@ -159,19 +166,41 @@ export default function MapView({ coordinates, address, amenities, isFullscreen 
           ))}
         </div>
         <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-xs font-semibold mb-1 dark:text-white">
+            {travelMode === 'walk' ? 'Walking Times' : 'Biking Times'}
+          </p>
           <div className="space-y-1 text-xs dark:text-gray-300">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-1 bg-green-500"></div>
-              <span>5 min (400m)</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-1 bg-yellow-500"></div>
-              <span>10 min (800m)</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-1 bg-blue-600"></div>
-              <span>15 min (1200m)</span>
-            </div>
+            {travelMode === 'walk' ? (
+              <>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-1 bg-green-500"></div>
+                  <span>5 min (400m)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-1 bg-yellow-500"></div>
+                  <span>10 min (800m)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-1 bg-blue-600"></div>
+                  <span>15 min (1200m)</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-1 bg-green-500"></div>
+                  <span>5 min (1000m)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-1 bg-yellow-500"></div>
+                  <span>10 min (2000m)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-1 bg-blue-600"></div>
+                  <span>15 min (3000m)</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
