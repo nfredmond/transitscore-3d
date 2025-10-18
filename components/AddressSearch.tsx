@@ -11,6 +11,8 @@ interface AddressSearchProps {
     amenities: any[]
     scores: any
     recommendation: string
+    walkIsochrones?: any
+    bikeIsochrones?: any
   }) => void
 }
 
@@ -44,7 +46,19 @@ export default function AddressSearch({ onAddressSelect }: AddressSearchProps) {
       }
       const amenitiesData = await amenitiesRes.json()
 
-      // Step 3: Get AI analysis
+      // Step 3: Fetch walking isochrones (network-based accessibility)
+      const walkIsoRes = await fetch(
+        `/api/isochrone?lat=${geocodeData.lat}&lng=${geocodeData.lng}&mode=walk`
+      )
+      const walkIsoData = await walkIsoRes.ok ? await walkIsoRes.json() : { isochrones: null }
+
+      // Step 4: Fetch biking isochrones
+      const bikeIsoRes = await fetch(
+        `/api/isochrone?lat=${geocodeData.lat}&lng=${geocodeData.lng}&mode=bike`
+      )
+      const bikeIsoData = await bikeIsoRes.ok ? await bikeIsoRes.json() : { isochrones: null }
+
+      // Step 5: Get AI analysis
       const analysisRes = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -60,14 +74,16 @@ export default function AddressSearch({ onAddressSelect }: AddressSearchProps) {
       }
       const analysisData = await analysisRes.json()
 
-      // Pass all data to parent
+      // Pass all data to parent including isochrones
       onAddressSelect({
         lat: geocodeData.lat,
         lng: geocodeData.lng,
         address: geocodeData.address,
         amenities: amenitiesData.amenities,
         scores: analysisData.scores,
-        recommendation: analysisData.recommendation
+        recommendation: analysisData.recommendation,
+        walkIsochrones: walkIsoData.isochrones,
+        bikeIsochrones: bikeIsoData.isochrones
       })
     } catch (err: any) {
       setError(err.message || 'An error occurred')

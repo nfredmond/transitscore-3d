@@ -31,6 +31,8 @@ export default function Home() {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null)
   const [address, setAddress] = useState<string>('')
   const [amenities, setAmenities] = useState<any[]>([])
+  const [walkIsochrones, setWalkIsochrones] = useState<any>(null)
+  const [bikeIsochrones, setBikeIsochrones] = useState<any>(null)
   const [scores, setScores] = useState<{
     walkability: number
     bikeability: number
@@ -45,10 +47,27 @@ export default function Home() {
   const [buildingHeight, setBuildingHeight] = useState<number>(35)
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false)
 
-  // Set default location on mount
+  // Set default location on mount and check for wizard data
   useEffect(() => {
     setCoordinates({ lat: DEFAULT_LOCATION.lat, lng: DEFAULT_LOCATION.lng })
     setAddress(DEFAULT_LOCATION.address)
+
+    // Check for wizard data
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('wizard') === 'true') {
+      const wizardData = sessionStorage.getItem('wizardData')
+      if (wizardData) {
+        const data = JSON.parse(wizardData)
+        // Auto-trigger analysis with wizard data
+        // Store wizard config for later use in scenario mode
+        sessionStorage.setItem('wizardConfig', JSON.stringify({
+          buildingChars: data.buildingChars,
+          tdmPrograms: data.tdmPrograms
+        }))
+        // Clear wizard data
+        sessionStorage.removeItem('wizardData')
+      }
+    }
   }, [])
 
   const handleAddressSelect = (data: {
@@ -58,12 +77,16 @@ export default function Home() {
     amenities: any[]
     scores: any
     recommendation: string
+    walkIsochrones?: any
+    bikeIsochrones?: any
   }) => {
     setCoordinates({ lat: data.lat, lng: data.lng })
     setAddress(data.address)
     setAmenities(data.amenities)
     setScores(data.scores)
     setRecommendation(data.recommendation)
+    setWalkIsochrones(data.walkIsochrones)
+    setBikeIsochrones(data.bikeIsochrones)
   }
 
   return (
@@ -152,9 +175,23 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Search Bar */}
+        {/* Search Bar with Wizard Option */}
         <div className="mb-6">
-          <AddressSearch onAddressSelect={handleAddressSelect} />
+          <div className="flex items-center space-x-4 mb-3">
+            <div className="flex-1">
+              <AddressSearch onAddressSelect={handleAddressSelect} />
+            </div>
+            <a
+              href="/wizard"
+              className="flex items-center space-x-2 px-6 py-4 bg-sacramento-gold hover:bg-yellow-500 text-gray-900 font-semibold rounded-xl transition-colors shadow-md whitespace-nowrap"
+            >
+              <span>🧙</span>
+              <span>Setup Wizard</span>
+            </a>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            Use the wizard for comprehensive project planning with building specs and TDM programs
+          </p>
         </div>
 
         {/* Content Grid */}
@@ -168,6 +205,8 @@ export default function Home() {
                   address={address}
                   amenities={amenities}
                   travelMode={travelMode}
+                  walkIsochrones={walkIsochrones}
+                  bikeIsochrones={bikeIsochrones}
                   isFullscreen={isFullscreen}
                   onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
                 />

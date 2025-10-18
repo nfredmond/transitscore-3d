@@ -11,13 +11,19 @@ interface MapViewProps {
   address: string
   amenities: any[]
   travelMode?: 'walk' | 'bike'
+  walkIsochrones?: any
+  bikeIsochrones?: any
   isFullscreen?: boolean
   onToggleFullscreen?: () => void
 }
 
-export default function MapView({ coordinates, address, amenities, travelMode = 'walk', isFullscreen = false, onToggleFullscreen }: MapViewProps) {
+export default function MapView({ coordinates, address, amenities, travelMode = 'walk', walkIsochrones, bikeIsochrones, isFullscreen = false, onToggleFullscreen }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  
+  // Determine which isochrones to display
+  const currentIsochrones = travelMode === 'walk' ? walkIsochrones : bikeIsochrones
+  const hasNetworkAnalysis = currentIsochrones && currentIsochrones.length > 0
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -39,37 +45,61 @@ export default function MapView({ coordinates, address, amenities, travelMode = 
 
     const map = mapRef.current
 
-    // Clear existing layers
+    // Clear existing layers except base tiles
     map.eachLayer((layer) => {
-      if (layer instanceof L.Circle || layer instanceof L.Marker) {
+      if (layer instanceof L.Circle || layer instanceof L.Marker || layer instanceof L.GeoJSON) {
         map.removeLayer(layer)
       }
     })
 
-    // Add mode-appropriate rings with shaded fills
-    const rings = travelMode === 'walk' 
-      ? [
-          { radius: 1200, color: '#0067B1', fillOpacity: 0.08, label: '15 min walk (1200m)' },
-          { radius: 800, color: '#FFB81C', fillOpacity: 0.12, label: '10 min walk (800m)' },
-          { radius: 400, color: '#10B981', fillOpacity: 0.15, label: '5 min walk (400m)' }
-        ]
-      : [
-          { radius: 3000, color: '#0067B1', fillOpacity: 0.06, label: '15 min bike (3000m)' },
-          { radius: 2000, color: '#FFB81C', fillOpacity: 0.10, label: '10 min bike (2000m)' },
-          { radius: 1000, color: '#10B981', fillOpacity: 0.14, label: '5 min bike (1000m)' }
-        ]
+    // Use network-based isochrones if available, otherwise fall back to simple rings
+    if (hasNetworkAnalysis) {
+      // Network-based isochrones (actual street network accessibility)
+      const colors = ['#0067B1', '#FFB81C', '#10B981']
+      const fillOpacities = [0.08, 0.12, 0.15]
+      const labels = travelMode === 'walk'
+        ? ['15 min walk', '10 min walk', '5 min walk']
+        : ['15 min bike', '10 min bike', '5 min bike']
 
-    // Draw rings from largest to smallest so smaller rings appear on top
-    rings.forEach((ring) => {
-      L.circle([coordinates.lat, coordinates.lng], {
-        radius: ring.radius,
-        color: ring.color,
-        fillColor: ring.color,
-        fillOpacity: ring.fillOpacity,
-        weight: 2,
-        opacity: 0.6
-      }).addTo(map).bindPopup(ring.label)
-    })
+      // Draw from largest to smallest (reverse order)
+      currentIsochrones.slice().reverse().forEach((isochrone: any, index: number) => {
+        const reverseIndex = currentIsochrones.length - 1 - index
+        
+        L.geoJSON(isochrone, {
+          style: {
+            color: colors[reverseIndex],
+            fillColor: colors[reverseIndex],
+            fillOpacity: fillOpacities[reverseIndex],
+            weight: 2,
+            opacity: 0.7
+          }
+        }).addTo(map).bindPopup(labels[reverseIndex])
+      })
+    } else {
+      // Fallback to simple radius rings if network analysis unavailable
+      const rings = travelMode === 'walk' 
+        ? [
+            { radius: 1200, color: '#0067B1', fillOpacity: 0.08, label: '15 min walk (approx 1200m)' },
+            { radius: 800, color: '#FFB81C', fillOpacity: 0.12, label: '10 min walk (approx 800m)' },
+            { radius: 400, color: '#10B981', fillOpacity: 0.15, label: '5 min walk (approx 400m)' }
+          ]
+        : [
+            { radius: 3000, color: '#0067B1', fillOpacity: 0.06, label: '15 min bike (approx 3000m)' },
+            { radius: 2000, color: '#FFB81C', fillOpacity: 0.10, label: '10 min bike (approx 2000m)' },
+            { radius: 1000, color: '#10B981', fillOpacity: 0.14, label: '5 min bike (approx 1000m)' }
+          ]
+
+      rings.forEach((ring) => {
+        L.circle([coordinates.lat, coordinates.lng], {
+          radius: ring.radius,
+          color: ring.color,
+          fillColor: ring.color,
+          fillOpacity: ring.fillOpacity,
+          weight: 2,
+          opacity: 0.6
+        }).addTo(map).bindPopup(ring.label)
+      })
+    }
 
     // Add main location marker
     const mainIcon = L.divIcon({
@@ -124,7 +154,7 @@ export default function MapView({ coordinates, address, amenities, travelMode = 
         mapRef.current = null
       }
     }
-  }, [coordinates, address, amenities, travelMode])
+  }, [coordinates, address, amenities, travelMode, walkIsochrones, bikeIsochrones])
 
   return (
     <div className="relative w-full h-full">
@@ -167,41 +197,25 @@ export default function MapView({ coordinates, address, amenities, travelMode = 
         </div>
         <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
           <p className="text-xs font-semibold mb-1 dark:text-white">
-            {travelMode === 'walk' ? 'Walking Times' : 'Biking Times'}
+            {travelMode === 'walk' ? 'Walking Network' : 'Biking Network'}
           </p>
           <div className="space-y-1 text-xs dark:text-gray-300">
-            {travelMode === 'walk' ? (
-              <>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-green-500"></div>
-                  <span>5 min (400m)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-yellow-500"></div>
-                  <span>10 min (800m)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-blue-600"></div>
-                  <span>15 min (1200m)</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-green-500"></div>
-                  <span>5 min (1000m)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-yellow-500"></div>
-                  <span>10 min (2000m)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-1 bg-blue-600"></div>
-                  <span>15 min (3000m)</span>
-                </div>
-              </>
-            )}
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-1 bg-green-500"></div>
+              <span>5 min</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-1 bg-yellow-500"></div>
+              <span>10 min</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-1 bg-blue-600"></div>
+              <span>15 min</span>
+            </div>
           </div>
+          <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 italic">
+            {hasNetworkAnalysis ? '✓ Network-based' : '~ Radius estimate'}
+          </p>
         </div>
       </div>
     </div>
