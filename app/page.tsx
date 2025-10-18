@@ -158,6 +158,8 @@ export default function Home() {
                   scores={scores}
                   recommendation={recommendation}
                   address={address}
+                  coordinates={coordinates}
+                  amenities={amenities}
                 />
               </div>
             )}

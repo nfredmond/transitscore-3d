@@ -1,6 +1,7 @@
 'use client'
 
-import { TrendingUp, Bus, Building, Leaf } from 'lucide-react'
+import { TrendingUp, Bus, Building, Leaf, Download } from 'lucide-react'
+import { generatePDF } from '@/lib/pdfExport'
 
 interface ScoreDashboardProps {
   scores: {
@@ -11,15 +12,36 @@ interface ScoreDashboardProps {
   } | null
   recommendation: string
   address: string
+  coordinates?: { lat: number; lng: number }
+  amenities?: any[]
 }
 
-export default function ScoreDashboard({ scores, recommendation, address }: ScoreDashboardProps) {
+export default function ScoreDashboard({ scores, recommendation, address, coordinates, amenities = [] }: ScoreDashboardProps) {
   if (!scores) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors">
         <p className="text-gray-500 dark:text-gray-400 text-center">Enter an address to see analysis</p>
       </div>
     )
+  }
+
+  const handleExport = () => {
+    if (!coordinates) return
+    
+    generatePDF({
+      address,
+      coordinates,
+      scores,
+      recommendation,
+      amenities,
+      analysisDate: new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    })
   }
 
   const metrics = [
@@ -123,8 +145,12 @@ export default function ScoreDashboard({ scores, recommendation, address }: Scor
       </div>
 
       {/* Export Button */}
-      <button className="w-full bg-sacramento-gold hover:bg-yellow-500 dark:hover:bg-yellow-600 text-gray-900 font-semibold py-3 rounded-xl transition-colors shadow-md">
-        Export Analysis
+      <button 
+        onClick={handleExport}
+        className="w-full bg-sacramento-gold hover:bg-yellow-500 dark:hover:bg-yellow-600 text-gray-900 font-semibold py-3 rounded-xl transition-colors shadow-md flex items-center justify-center space-x-2"
+      >
+        <Download className="w-5 h-5" />
+        <span>Export Analysis as PDF</span>
       </button>
     </div>
   )
