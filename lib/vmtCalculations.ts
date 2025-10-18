@@ -92,7 +92,8 @@ export function calculateVMT(scenario: DevelopmentScenario): VMTResults {
     vmtReduction: Math.round(totalReduction * 100),
     baseline: {
       dailyVMTPerCapita: CA_BASELINE_VMT_PER_CAPITA,
-      dailyVMTTotal: Math.round(baselineDailyTotal)
+      dailyVMTTotal: Math.round(baselineDailyTotal),
+      annualVMTTotal: Math.round(baselineDailyTotal * 365)
     }
   }
 }
