@@ -18,6 +18,7 @@ export interface VMTResults {
   baseline: {
     dailyVMTPerCapita: number
     dailyVMTTotal: number
+    annualVMTTotal: number
   }
 }
 
