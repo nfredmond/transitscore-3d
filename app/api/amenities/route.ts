@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { calculateDistance } from '@/lib/utils'
+import cache, { TTL, generateCacheKey } from '@/lib/cache'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -14,6 +15,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Check cache first (round coordinates to avoid cache misses for minor differences)
+    const roundedLat = Math.round(lat * 1000) / 1000
+    const roundedLng = Math.round(lng * 1000) / 1000
+    const cacheKey = generateCacheKey('amenities', { lat: roundedLat, lng: roundedLng })
+    const cached = cache.get(cacheKey)
+    
+    if (cached) {
+      return NextResponse.json(cached)
+    }
+
     // Define search radius in meters
     const radius = 1500 // 1.5km to cover all walk times
 
@@ -123,10 +134,15 @@ export async function GET(request: NextRequest) {
     // Sort by distance
     amenities.sort((a: any, b: any) => a.distance - b.distance)
 
-    return NextResponse.json({
+    const responseData = {
       amenities,
       count: amenities.length
-    })
+    }
+
+    // Cache the result
+    cache.set(cacheKey, responseData, TTL.AMENITIES)
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error('Amenities fetch error:', error)
     return NextResponse.json(

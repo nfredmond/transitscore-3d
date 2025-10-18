@@ -93,14 +93,14 @@ export default function ScoreDashboard({ scores, recommendation, address, coordi
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 stagger-children">
       {/* Metrics Cards */}
       {metrics.map((metric) => {
         const Icon = metric.icon
         return (
           <div
             key={metric.label}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 hover:shadow-xl transition-all"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 hover-lift shine"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center space-x-3">

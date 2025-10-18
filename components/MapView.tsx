@@ -22,7 +22,15 @@ export default function MapView({ coordinates, address, amenities, travelMode = 
   const containerRef = useRef<HTMLDivElement>(null)
   
   // Determine which isochrones to display
-  const currentIsochrones = travelMode === 'walk' ? walkIsochrones : bikeIsochrones
+  // Handle both array format and object format { isochrones: [...] }
+  const getIsochroneArray = (data: any) => {
+    if (!data) return null
+    if (Array.isArray(data)) return data
+    if (data.isochrones && Array.isArray(data.isochrones)) return data.isochrones
+    return null
+  }
+  
+  const currentIsochrones = getIsochroneArray(travelMode === 'walk' ? walkIsochrones : bikeIsochrones)
   const hasNetworkAnalysis = currentIsochrones && currentIsochrones.length > 0
 
   useEffect(() => {
