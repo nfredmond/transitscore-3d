@@ -11,6 +11,8 @@ interface AddressSearchProps {
     amenities: any[]
     scores: any
     recommendation: string
+    walkIsochrones?: any
+    bikeIsochrones?: any
   }) => void
 }
 
