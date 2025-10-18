@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { calculateWalkabilityScore, calculateBikeabilityScore, calculateTransitScore } from '@/lib/utils'
 import { logAnalyzedSite } from '@/lib/supabase'
+import cache, { TTL, generateCacheKey } from '@/lib/cache'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || ''
@@ -17,6 +18,29 @@ export async function POST(request: NextRequest) {
         { error: 'Missing required fields' },
         { status: 400 }
       )
+    }
+
+    // Check cache first (round coordinates and use amenity count for key)
+    const roundedLat = Math.round(lat * 1000) / 1000
+    const roundedLng = Math.round(lng * 1000) / 1000
+    const cacheKey = generateCacheKey('analysis', { 
+      lat: roundedLat, 
+      lng: roundedLng, 
+      amenityCount: amenities.length 
+    })
+    const cached = cache.get<any>(cacheKey)
+    
+    if (cached && cached.scores) {
+      // Still log to Supabase even if cached
+      await logAnalyzedSite({
+        address,
+        lat,
+        lng,
+        walkability_score: cached.scores.walkability,
+        transit_score: cached.scores.transit,
+        amenity_count: amenities.length
+      })
+      return NextResponse.json(cached)
     }
 
     // Calculate scores for both walking and biking
@@ -112,7 +136,7 @@ Format your response as JSON:
       amenity_count: amenities.length
     })
 
-    return NextResponse.json({
+    const responseData = {
       scores: {
         walkability: walkabilityScore,
         bikeability: bikeabilityScore,
@@ -124,7 +148,12 @@ Format your response as JSON:
       suggestedUnits: recommendation.suggestedUnits,
       recommendedHeight: recommendation.recommendedHeight,
       reasoning: recommendation.reasoning
-    })
+    }
+
+    // Cache the result
+    cache.set(cacheKey, responseData, TTL.AI_ANALYSIS)
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error('Analysis error:', error)
     return NextResponse.json(

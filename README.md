@@ -4,13 +4,29 @@ A professional California development site analyzer providing network-based acce
 
 ## Features
 
+### Analysis & Planning
 - 🗺️ **Network-Based Analysis** - True street network accessibility (not simple radius circles)
 - 🚶🚴 **Walk & Bike Modes** - Separate analysis for pedestrian and cycling accessibility
 - 🏢 **Scenario Planning** - Configure building characteristics and TDM programs
 - 📊 **VMT/GHG Calculations** - CARB-compliant environmental impact analysis
 - 🤖 **AI Recommendations** - Context-aware density suggestions using Claude AI
 - 📄 **Professional Reports** - Export comprehensive PDF analysis
-- 🌙 **Dark Mode** - Full dark theme support
+- 🔄 **Scenario Comparison** - Save and compare up to 3 development scenarios side-by-side
+
+### User Experience
+- 🌙 **Dark Mode** - Full dark theme support with smooth transitions
+- 📱 **Mobile Optimized** - Responsive design with touch-friendly controls
+- ⚡ **Fast Loading** - Multi-step progress indicators and skeleton screens
+- 🎨 **Beautiful Animations** - Smooth micro-interactions and transitions
+- ♿ **Accessible** - Keyboard navigation and screen reader support
+
+### Performance & Reliability
+- 💾 **Smart Caching** - In-memory caching for geocoding, amenities, and AI responses
+- 🔄 **Auto-Retry** - Automatic retry with exponential backoff for transient failures
+- 🛡️ **Error Boundaries** - Graceful error handling with detailed error messages
+- 🚦 **Rate Limiting** - 30 requests per minute to prevent abuse
+
+### Monetization
 - 💰 **Two Tiers** - Free version with Venmo donations, Pro version with $20/month subscriptions
 
 ## Tech Stack
@@ -29,6 +45,8 @@ A professional California development site analyzer providing network-based acce
 - Node.js 18+ 
 - Supabase account
 - Anthropic API key
+- OpenRouteService API key (free) - **Required for network-based isochrones**
+  - See [NETWORK_ANALYSIS_SETUP.md](NETWORK_ANALYSIS_SETUP.md) for setup instructions
 
 ### Installation
 
@@ -53,6 +71,10 @@ Edit `.env.local` with your credentials:
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
+
+# OpenRouteService API Key (Required for network-based isochrones)
+# Sign up for free at: https://openrouteservice.org/dev/#/signup
+OPENROUTE_SERVICE_API_KEY=your_ors_api_key
 ```
 
 4. Set up Supabase database:

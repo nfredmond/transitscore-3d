@@ -5,18 +5,21 @@ import dynamic from 'next/dynamic'
 import AddressSearch from '@/components/AddressSearch'
 import ScoreDashboard from '@/components/ScoreDashboard'
 import ScenarioPlanner from '@/components/ScenarioPlanner'
+import ErrorBoundary, { ComponentErrorBoundary } from '@/components/ErrorBoundary'
 import { MapPin, Moon, Sun, LayoutGrid } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 
 // Dynamically import map components with no SSR to avoid window issues
+import { SkeletonMap, SkeletonCard } from '@/components/SkeletonLoader'
+
 const MapView = dynamic(() => import('@/components/MapView'), { 
   ssr: false,
-  loading: () => <div className="flex items-center justify-center h-full dark:text-white">Loading map...</div>
+  loading: () => <SkeletonMap />
 })
 
 const ThreeDView = dynamic(() => import('@/components/ThreeDView'), { 
   ssr: false,
-  loading: () => <div className="flex items-center justify-center h-full dark:text-white">Loading 3D view...</div>
+  loading: () => <SkeletonMap />
 })
 
 // Default location: West Sacramento Community Center
@@ -90,36 +93,39 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="bg-sacramento-blue p-2 rounded-lg">
-                <MapPin className="w-8 h-8 text-white" />
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors">
+        {/* Header */}
+        <header className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700 transition-colors sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center space-x-2 md:space-x-3">
+              <div className="bg-sacramento-blue p-1.5 md:p-2 rounded-lg">
+                <MapPin className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white">
                   TransitScore <span className="text-sacramento-gold">3D</span>
                 </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-300">California Development Site Analyzer</p>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300 hidden sm:block">California Development Site Analyzer</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 md:space-x-2 flex-wrap gap-2">
               {/* Join Pro Button */}
               <a
                 href="/auth"
-                className="flex items-center space-x-2 px-4 py-2 bg-sacramento-gold hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition-colors shadow-md"
+                className="flex items-center space-x-1 md:space-x-2 px-3 md:px-4 py-1.5 md:py-2 bg-sacramento-gold hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition-colors shadow-md text-sm md:text-base"
               >
                 <span>⭐</span>
-                <span>Join Pro - $20/mo</span>
+                <span className="hidden sm:inline">Join Pro - </span>
+                <span className="sm:hidden">Pro </span>
+                <span>$20/mo</span>
               </a>
               
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="Toggle theme"
               >
                 {theme === 'light' ? (
@@ -135,45 +141,53 @@ export default function Home() {
                   <div className="flex bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
                     <button
                       onClick={() => setTravelMode('walk')}
-                      className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors ${
+                      className={`px-2 md:px-3 py-1.5 rounded-md font-medium text-xs md:text-sm transition-colors min-w-[60px] ${
                         travelMode === 'walk'
                           ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                           : 'text-gray-600 dark:text-gray-300'
                       }`}
+                      aria-label="Walk mode"
                     >
-                      🚶 Walk
+                      <span className="md:hidden">🚶</span>
+                      <span className="hidden md:inline">🚶 Walk</span>
                     </button>
                     <button
                       onClick={() => setTravelMode('bike')}
-                      className={`px-3 py-1.5 rounded-md font-medium text-sm transition-colors ${
+                      className={`px-2 md:px-3 py-1.5 rounded-md font-medium text-xs md:text-sm transition-colors min-w-[60px] ${
                         travelMode === 'bike'
                           ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                           : 'text-gray-600 dark:text-gray-300'
                       }`}
+                      aria-label="Bike mode"
                     >
-                      🚴 Bike
+                      <span className="md:hidden">🚴</span>
+                      <span className="hidden md:inline">🚴 Bike</span>
                     </button>
                   </div>
                   
                   <button
                     onClick={() => setViewMode('2d')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium text-xs md:text-sm transition-colors min-w-[60px] ${
                       viewMode === '2d'
                         ? 'bg-sacramento-blue text-white'
                         : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                     }`}
+                    aria-label="2D map view"
                   >
-                    2D Map
+                    <span className="md:hidden">2D</span>
+                    <span className="hidden md:inline">2D Map</span>
                   </button>
                   <button
                     onClick={() => setViewMode('3d')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium text-xs md:text-sm transition-colors min-w-[60px] ${
                       viewMode === '3d'
                         ? 'bg-sacramento-blue text-white'
                         : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                     }`}
+                    aria-label="3D view"
                   >
-                    3D View
+                    <span className="md:hidden">3D</span>
+                    <span className="hidden md:inline">3D View</span>
                   </button>
                 </>
               )}
@@ -205,27 +219,29 @@ export default function Home() {
 
         {/* Content Grid */}
         {coordinates ? (
-          <div className={`grid grid-cols-1 ${isFullscreen ? '' : 'lg:grid-cols-3'} gap-6`}>
+          <div className={`grid grid-cols-1 ${isFullscreen ? '' : 'lg:grid-cols-3'} gap-4 md:gap-6`}>
             {/* Map/3D View - Takes up 2 columns or fullscreen */}
-            <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'lg:col-span-2'} bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all`} style={{ height: isFullscreen ? '100vh' : '600px' }}>
-              {viewMode === '2d' ? (
-                <MapView
-                  coordinates={coordinates}
-                  address={address}
-                  amenities={amenities}
-                  travelMode={travelMode}
-                  walkIsochrones={walkIsochrones}
-                  bikeIsochrones={bikeIsochrones}
-                  isFullscreen={isFullscreen}
-                  onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
-                />
-              ) : (
-                <ThreeDView
-                  coordinates={coordinates}
-                  buildingHeight={buildingHeight}
-                  onHeightChange={setBuildingHeight}
-                />
-              )}
+            <div className={`${isFullscreen ? 'fixed inset-0 z-50' : 'lg:col-span-2'} bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all animate-scale-in h-[400px] md:h-[600px] ${isFullscreen ? '!h-screen' : ''}`}>
+              <ComponentErrorBoundary componentName={viewMode === '2d' ? 'Map View' : '3D View'}>
+                {viewMode === '2d' ? (
+                  <MapView
+                    coordinates={coordinates}
+                    address={address}
+                    amenities={amenities}
+                    travelMode={travelMode}
+                    walkIsochrones={walkIsochrones}
+                    bikeIsochrones={bikeIsochrones}
+                    isFullscreen={isFullscreen}
+                    onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+                  />
+                ) : (
+                  <ThreeDView
+                    coordinates={coordinates}
+                    buildingHeight={buildingHeight}
+                    onHeightChange={setBuildingHeight}
+                  />
+                )}
+              </ComponentErrorBoundary>
             </div>
 
             {/* Dashboard - Takes up 1 column */}
@@ -256,25 +272,27 @@ export default function Home() {
                 </div>
 
                 {/* Conditional Dashboard Content */}
-                {dashboardMode === 'scores' ? (
-                  <ScoreDashboard
-                    scores={scores}
-                    recommendation={recommendation}
-                    address={address}
-                    coordinates={coordinates}
-                    amenities={amenities}
-                    travelMode={travelMode}
-                  />
-                ) : (
-                  scores && (
-                    <ScenarioPlanner
-                      walkabilityScore={scores.walkability}
-                      bikeabilityScore={scores.bikeability}
-                      transitScore={scores.transit}
+                <ComponentErrorBoundary componentName={dashboardMode === 'scores' ? 'Score Dashboard' : 'Scenario Planner'}>
+                  {dashboardMode === 'scores' ? (
+                    <ScoreDashboard
+                      scores={scores}
+                      recommendation={recommendation}
+                      address={address}
+                      coordinates={coordinates}
+                      amenities={amenities}
                       travelMode={travelMode}
                     />
-                  )
-                )}
+                  ) : (
+                    scores && (
+                      <ScenarioPlanner
+                        walkabilityScore={scores.walkability}
+                        bikeabilityScore={scores.bikeability}
+                        transitScore={scores.transit}
+                        travelMode={travelMode}
+                      />
+                    )
+                  )}
+                </ComponentErrorBoundary>
               </div>
             )}
           </div>
@@ -314,6 +332,7 @@ export default function Home() {
         </div>
       </footer>
     </div>
+    </ErrorBoundary>
   )
 }
 

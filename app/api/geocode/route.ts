@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import cache, { TTL, generateCacheKey } from '@/lib/cache'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -9,6 +10,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Check cache first
+    const cacheKey = generateCacheKey('geocode', { address: address.toLowerCase().trim() })
+    const cached = cache.get(cacheKey)
+    
+    if (cached) {
+      return NextResponse.json(cached)
+    }
+
     // Use Nominatim (OpenStreetMap) for geocoding
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?` +
@@ -48,12 +57,17 @@ export async function GET(request: NextRequest) {
 
     const result = californiaResults[0]
 
-    return NextResponse.json({
+    const responseData = {
       lat: parseFloat(result.lat),
       lng: parseFloat(result.lon),
       address: result.display_name,
       city: 'Sacramento'
-    })
+    }
+
+    // Cache the result
+    cache.set(cacheKey, responseData, TTL.GEOCODE)
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error('Geocoding error:', error)
     return NextResponse.json(

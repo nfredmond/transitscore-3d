@@ -6,13 +6,24 @@ import { calculateTDMImpact, TDMProgram, BuildingCharacteristics } from '@/lib/t
 import TDMSelector from './TDMSelector'
 import BuildingInput from './BuildingInput'
 import ImpactMetrics from './ImpactMetrics'
-import { BarChart3, TrendingDown } from 'lucide-react'
+import ScenarioComparison from './ScenarioComparison'
+import { BarChart3, TrendingDown, Save, GitCompare } from 'lucide-react'
 
 interface ScenarioPlannerProps {
   walkabilityScore: number
   bikeabilityScore: number
   transitScore: number
   travelMode: 'walk' | 'bike'
+}
+
+interface SavedScenario {
+  id: string
+  name: string
+  buildingChars: BuildingCharacteristics
+  tdmPrograms: TDMProgram[]
+  vmt: any
+  ghg: any
+  timestamp: number
 }
 
 export default function ScenarioPlanner({ walkabilityScore, bikeabilityScore, transitScore, travelMode }: ScenarioPlannerProps) {
@@ -27,6 +38,20 @@ export default function ScenarioPlanner({ walkabilityScore, bikeabilityScore, tr
   
   const [tdmPrograms, setTDMPrograms] = useState<TDMProgram[]>([])
   const [impact, setImpact] = useState<any>(null)
+  const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([])
+  const [showComparison, setShowComparison] = useState(false)
+
+  // Load saved scenarios from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('savedScenarios')
+    if (saved) {
+      try {
+        setSavedScenarios(JSON.parse(saved))
+      } catch (e) {
+        console.error('Failed to load saved scenarios:', e)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     // Calculate impact whenever building characteristics or TDM programs change
@@ -79,17 +104,76 @@ export default function ScenarioPlanner({ walkabilityScore, bikeabilityScore, tr
     })
   }, [buildingChars, tdmPrograms, walkabilityScore, bikeabilityScore, transitScore])
 
+  const handleSaveScenario = () => {
+    if (!impact) return
+
+    const scenarioName = prompt('Enter a name for this scenario:', `Scenario ${savedScenarios.length + 1}`)
+    if (!scenarioName) return
+
+    const newScenario: SavedScenario = {
+      id: Date.now().toString(),
+      name: scenarioName,
+      buildingChars: { ...buildingChars },
+      tdmPrograms: [...tdmPrograms],
+      vmt: { ...impact.vmt },
+      ghg: { ...impact.ghg },
+      timestamp: Date.now()
+    }
+
+    const updated = [...savedScenarios, newScenario].slice(-3) // Keep only last 3
+    setSavedScenarios(updated)
+    localStorage.setItem('savedScenarios', JSON.stringify(updated))
+  }
+
+  const handleDeleteScenario = (id: string) => {
+    const updated = savedScenarios.filter(s => s.id !== id)
+    setSavedScenarios(updated)
+    localStorage.setItem('savedScenarios', JSON.stringify(updated))
+  }
+
   return (
     <div className="space-y-4">
       <div className="bg-gradient-to-r from-sacramento-blue to-sacramento-darkblue rounded-xl shadow-lg p-5 text-white">
-        <div className="flex items-center space-x-2 mb-2">
-          <BarChart3 className="w-5 h-5" />
-          <h2 className="font-bold text-lg">Scenario Planning</h2>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2">
+            <BarChart3 className="w-5 h-5" />
+            <h2 className="font-bold text-lg">Scenario Planning</h2>
+          </div>
+          <div className="flex space-x-2">
+            {savedScenarios.length > 0 && (
+              <button
+                onClick={() => setShowComparison(true)}
+                className="flex items-center space-x-1 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+                aria-label="Compare scenarios"
+              >
+                <GitCompare className="w-4 h-4" />
+                <span>Compare ({savedScenarios.length})</span>
+              </button>
+            )}
+            <button
+              onClick={handleSaveScenario}
+              disabled={!impact}
+              className="flex items-center space-x-1 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Save scenario"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save</span>
+            </button>
+          </div>
         </div>
         <p className="text-sm text-white/80">
           Configure your development and select TDM programs to see environmental impact
         </p>
       </div>
+
+      {/* Scenario Comparison Modal */}
+      {showComparison && (
+        <ScenarioComparison
+          scenarios={savedScenarios}
+          onClose={() => setShowComparison(false)}
+          onDeleteScenario={handleDeleteScenario}
+        />
+      )}
 
       {/* Building Characteristics */}
       <BuildingInput 
