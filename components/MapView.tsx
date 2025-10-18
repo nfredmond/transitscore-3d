@@ -20,6 +20,10 @@ interface MapViewProps {
 export default function MapView({ coordinates, address, amenities, travelMode = 'walk', walkIsochrones, bikeIsochrones, isFullscreen = false, onToggleFullscreen }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  
+  // Determine which isochrones to display
+  const currentIsochrones = travelMode === 'walk' ? walkIsochrones : bikeIsochrones
+  const hasNetworkAnalysis = currentIsochrones && currentIsochrones.length > 0
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -49,9 +53,7 @@ export default function MapView({ coordinates, address, amenities, travelMode = 
     })
 
     // Use network-based isochrones if available, otherwise fall back to simple rings
-    const currentIsochrones = travelMode === 'walk' ? walkIsochrones : bikeIsochrones
-
-    if (currentIsochrones && currentIsochrones.length > 0) {
+    if (hasNetworkAnalysis) {
       // Network-based isochrones (actual street network accessibility)
       const colors = ['#0067B1', '#FFB81C', '#10B981']
       const fillOpacities = [0.08, 0.12, 0.15]
@@ -212,7 +214,7 @@ export default function MapView({ coordinates, address, amenities, travelMode = 
             </div>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 italic">
-            {currentIsochrones ? '✓ Network-based' : '~ Radius estimate'}
+            {hasNetworkAnalysis ? '✓ Network-based' : '~ Radius estimate'}
           </p>
         </div>
       </div>
