@@ -36,6 +36,7 @@ export default function ScoreDashboard({ scores, recommendation, address, coordi
       scores,
       recommendation,
       amenities,
+      travelMode,
       analysisDate: new Date().toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',

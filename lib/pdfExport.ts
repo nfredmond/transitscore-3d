@@ -6,6 +6,7 @@ interface ExportData {
   coordinates: { lat: number; lng: number }
   scores: {
     walkability: number
+    bikeability: number
     transit: number
     density: number
     sustainability: number
@@ -13,6 +14,13 @@ interface ExportData {
   recommendation: string
   amenities: any[]
   analysisDate: string
+  travelMode?: 'walk' | 'bike'
+  scenarioData?: {
+    building?: any
+    vmt?: any
+    ghg?: any
+    tdmPrograms?: any[]
+  }
 }
 
 export function generatePDF(data: ExportData) {
@@ -76,12 +84,16 @@ export function generatePDF(data: ExportData) {
   
   yPosition += 10
   
-  // Score Cards
+  // Score Cards - adapt based on travel mode
   const scores = [
-    { label: 'Walkability Score', value: data.scores.walkability, color: [16, 185, 129], icon: '🚶' },
-    { label: 'Transit Access Score', value: data.scores.transit, color: [59, 130, 246], icon: '🚌' },
-    { label: 'Density Potential', value: data.scores.density, color: [168, 85, 247], icon: '🏢' },
-    { label: 'Sustainability Score', value: data.scores.sustainability, color: [16, 185, 129], icon: '🌱' }
+    { 
+      label: data.travelMode === 'bike' ? 'Bikeability Score' : 'Walkability Score', 
+      value: data.travelMode === 'bike' ? data.scores.bikeability : data.scores.walkability, 
+      color: [16, 185, 129] 
+    },
+    { label: 'Transit Access Score', value: data.scores.transit, color: [59, 130, 246] },
+    { label: 'Density Potential', value: data.scores.density, color: [168, 85, 247] },
+    { label: 'Sustainability Score', value: data.scores.sustainability, color: [16, 185, 129] }
   ]
   
   scores.forEach((score, index) => {
@@ -200,6 +212,189 @@ export function generatePDF(data: ExportData) {
     },
     margin: { left: 20, right: 20 }
   })
+  
+  // Add Scenario Planning Data if available
+  if (data.scenarioData && data.scenarioData.vmt) {
+    doc.addPage()
+    yPosition = 20
+    
+    // Scenario Planning Header
+    doc.setFillColor(primaryBlue[0], primaryBlue[1], primaryBlue[2])
+    doc.rect(0, 0, 210, 35, 'F')
+    
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(20)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Development Scenario Analysis', 20, 15)
+    
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Transportation Demand Management & Environmental Impact', 20, 25)
+    
+    yPosition = 45
+    
+    // Building Characteristics Section
+    if (data.scenarioData.building) {
+      const building = data.scenarioData.building
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+      doc.text('Building Characteristics', 20, yPosition)
+      
+      yPosition += 8
+      
+      const buildingData = [
+        ['Building Type', building.buildingType],
+        ['Floors', building.floors.toString()],
+        ['Total Square Feet', building.totalSqFt.toLocaleString() + ' sqft'],
+        ['Residential Units', building.units.toString()],
+        ['Parking Spaces', building.parkingSpaces.toString()],
+        ['Parking Ratio', (building.parkingSpaces / building.units).toFixed(2) + ' spaces/unit'],
+        ['Avg Unit Size', Math.round(building.totalSqFt / building.units).toLocaleString() + ' sqft'],
+        ['Affordable Housing', building.affordableHousingPercent + '%']
+      ]
+      
+      ;(doc as any).autoTable({
+        startY: yPosition,
+        body: buildingData,
+        theme: 'plain',
+        bodyStyles: {
+          fontSize: 10,
+          textColor: darkGray
+        },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 80 },
+          1: { cellWidth: 80 }
+        },
+        margin: { left: 20 }
+      })
+      
+      yPosition = (doc as any).lastAutoTable.finalY + 10
+    }
+    
+    // VMT Analysis Section
+    const vmt = data.scenarioData.vmt
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+    doc.text('Vehicle Miles Traveled (VMT) Analysis', 20, yPosition)
+    
+    yPosition += 8
+    
+    const vmtData = [
+      ['Metric', 'Baseline', 'With TDM', 'Reduction'],
+      [
+        'Daily VMT per Capita', 
+        vmt.baseline.dailyVMTPerCapita.toFixed(1) + ' mi',
+        vmt.dailyVMTPerCapita.toFixed(1) + ' mi',
+        vmt.vmtReduction.toFixed(1) + '%'
+      ],
+      [
+        'Annual VMT Total',
+        (vmt.baseline.annualVMTTotal / 1000).toFixed(1) + 'k mi',
+        (vmt.annualVMTTotal / 1000).toFixed(1) + 'k mi',
+        ((vmt.baseline.annualVMTTotal - vmt.annualVMTTotal) / 1000).toFixed(1) + 'k mi saved'
+      ]
+    ]
+    
+    ;(doc as any).autoTable({
+      startY: yPosition,
+      head: [vmtData[0]],
+      body: vmtData.slice(1),
+      theme: 'grid',
+      headStyles: {
+        fillColor: primaryBlue,
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9
+      },
+      bodyStyles: {
+        fontSize: 9,
+        textColor: darkGray
+      },
+      margin: { left: 20, right: 20 }
+    })
+    
+    yPosition = (doc as any).lastAutoTable.finalY + 10
+    
+    // GHG Emissions Section
+    const ghg = data.scenarioData.ghg
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Greenhouse Gas (GHG) Emissions', 20, yPosition)
+    
+    yPosition += 8
+    
+    const ghgData = [
+      ['Metric', 'Baseline', 'With TDM', 'Reduction'],
+      [
+        'Annual GHG Emissions',
+        ghg.baseline.annualGHG.toFixed(2) + ' tons CO2e',
+        ghg.annualGHG.toFixed(2) + ' tons CO2e',
+        ghg.ghgReduction.toFixed(1) + '%'
+      ],
+      [
+        'Climate Impact',
+        'Standard Development',
+        ghg.equivalents.carsOffRoad.toFixed(1) + ' cars removed',
+        ghg.equivalents.treesPlanted + ' trees planted'
+      ]
+    ]
+    
+    ;(doc as any).autoTable({
+      startY: yPosition,
+      head: [ghgData[0]],
+      body: ghgData.slice(1),
+      theme: 'grid',
+      headStyles: {
+        fillColor: [16, 185, 129],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9
+      },
+      bodyStyles: {
+        fontSize: 9,
+        textColor: darkGray
+      },
+      margin: { left: 20, right: 20 }
+    })
+    
+    yPosition = (doc as any).lastAutoTable.finalY + 10
+    
+    // TDM Programs Section
+    if (data.scenarioData.tdmPrograms && data.scenarioData.tdmPrograms.length > 0) {
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2])
+      doc.text('Transportation Demand Management Programs', 20, yPosition)
+      
+      yPosition += 8
+      
+      const tdmData = data.scenarioData.tdmPrograms.map((program: any) => [
+        program.name,
+        program.category.charAt(0).toUpperCase() + program.category.slice(1),
+        '-' + program.vmtReduction + '%'
+      ])
+      
+      ;(doc as any).autoTable({
+        startY: yPosition,
+        head: [['Program', 'Category', 'VMT Reduction']],
+        body: tdmData,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [245, 158, 11],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 9
+        },
+        bodyStyles: {
+          fontSize: 8,
+          textColor: darkGray
+        },
+        margin: { left: 20, right: 20 }
+      })
+    }
+  }
   
   // Footer
   const pageCount = (doc as any).internal.getNumberOfPages()
