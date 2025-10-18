@@ -18,26 +18,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Stripe checkout session for $20/month subscription
+    // Using existing product and price from Stripe account
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'TransitScore 3D Pro',
-              description: 'Professional Development Impact Analyzer - Monthly Subscription',
-            },
-            unit_amount: 2000, // $20.00 in cents
-            recurring: {
-              interval: 'month',
-            },
-          },
+          price: 'price_1SJPBOFSYcTHcWEtQIFIb6at', // $20/month recurring price
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      success_url: `${request.headers.get('origin')}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${request.headers.get('origin')}/?subscribed=true`,
       cancel_url: `${request.headers.get('origin')}/subscribe`,
       customer_email: email,
       client_reference_id: userId,
