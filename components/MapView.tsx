@@ -4,14 +4,17 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { AMENITY_CATEGORIES } from '@/lib/utils'
+import { Maximize, Minimize, X } from 'lucide-react'
 
 interface MapViewProps {
   coordinates: { lat: number; lng: number }
   address: string
   amenities: any[]
+  isFullscreen?: boolean
+  onToggleFullscreen?: () => void
 }
 
-export default function MapView({ coordinates, address, amenities }: MapViewProps) {
+export default function MapView({ coordinates, address, amenities, isFullscreen = false, onToggleFullscreen }: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -25,9 +28,11 @@ export default function MapView({ coordinates, address, amenities }: MapViewProp
         15
       )
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 19
+      // Use CARTO Voyager basemap
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
       }).addTo(mapRef.current)
     }
 
@@ -40,20 +45,22 @@ export default function MapView({ coordinates, address, amenities }: MapViewProp
       }
     })
 
-    // Add walkability rings
+    // Add walkability rings with shaded fills
     const rings = [
-      { radius: 400, color: '#10B981', label: '5 min walk' },
-      { radius: 800, color: '#FFB81C', label: '10 min walk' },
-      { radius: 1200, color: '#0067B1', label: '15 min walk' }
+      { radius: 1200, color: '#0067B1', fillOpacity: 0.08, label: '15 min walk (1200m)' },
+      { radius: 800, color: '#FFB81C', fillOpacity: 0.12, label: '10 min walk (800m)' },
+      { radius: 400, color: '#10B981', fillOpacity: 0.15, label: '5 min walk (400m)' }
     ]
 
+    // Draw rings from largest to smallest so smaller rings appear on top
     rings.forEach((ring) => {
       L.circle([coordinates.lat, coordinates.lng], {
         radius: ring.radius,
         color: ring.color,
         fillColor: ring.color,
-        fillOpacity: 0.1,
-        weight: 2
+        fillOpacity: ring.fillOpacity,
+        weight: 2,
+        opacity: 0.6
       }).addTo(map).bindPopup(ring.label)
     })
 
@@ -116,10 +123,25 @@ export default function MapView({ coordinates, address, amenities }: MapViewProp
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
       
+      {/* Fullscreen Toggle Button */}
+      {onToggleFullscreen && (
+        <button
+          onClick={onToggleFullscreen}
+          className="absolute top-4 right-4 z-[1000] bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 p-3 rounded-lg shadow-lg transition-colors"
+          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+        >
+          {isFullscreen ? (
+            <Minimize className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+          ) : (
+            <Maximize className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+          )}
+        </button>
+      )}
+      
       {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-3 max-w-xs z-[1000]">
-        <h3 className="font-semibold text-sm mb-2">Legend</h3>
-        <div className="space-y-1 text-xs">
+      <div className="absolute bottom-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 max-w-xs z-[1000] transition-colors">
+        <h3 className="font-semibold text-sm mb-2 dark:text-white">Legend</h3>
+        <div className="space-y-1 text-xs dark:text-gray-300">
           <div className="flex items-center space-x-2">
             <div className="w-4 h-4 rounded-full bg-red-500 border-2 border-white"></div>
             <span>Site Location</span>
@@ -136,8 +158,8 @@ export default function MapView({ coordinates, address, amenities }: MapViewProp
             </div>
           ))}
         </div>
-        <div className="mt-2 pt-2 border-t">
-          <div className="space-y-1 text-xs">
+        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <div className="space-y-1 text-xs dark:text-gray-300">
             <div className="flex items-center space-x-2">
               <div className="w-4 h-1 bg-green-500"></div>
               <span>5 min (400m)</span>

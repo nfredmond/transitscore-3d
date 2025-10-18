@@ -80,13 +80,13 @@ export default function AddressSearch({ onAddressSelect }: AddressSearchProps) {
     <div className="w-full">
       <form onSubmit={handleSearch} className="relative">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
           <input
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter Sacramento address (e.g., 1400 K St, Sacramento, CA)"
-            className="w-full pl-12 pr-32 py-4 rounded-xl border-2 border-gray-200 focus:border-sacramento-blue focus:outline-none text-lg transition-colors shadow-sm"
+            placeholder="Enter California address (e.g., 1075 W Capitol Ave, West Sacramento, CA)"
+            className="w-full pl-12 pr-32 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-sacramento-blue dark:focus:border-sacramento-gold focus:outline-none text-lg transition-colors shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             disabled={loading}
           />
           <button
@@ -107,7 +107,7 @@ export default function AddressSearch({ onAddressSelect }: AddressSearchProps) {
       </form>
 
       {error && (
-        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 text-red-700">
+        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center space-x-2 text-red-700 dark:text-red-400">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -115,16 +115,17 @@ export default function AddressSearch({ onAddressSelect }: AddressSearchProps) {
 
       {/* Quick suggestions */}
       <div className="mt-3 flex flex-wrap gap-2">
-        <span className="text-sm text-gray-600">Try:</span>
+        <span className="text-sm text-gray-600 dark:text-gray-400">Try:</span>
         {[
+          '1075 W Capitol Ave, West Sacramento, CA',
           '1400 K St, Sacramento, CA',
-          '1500 Capitol Ave, Sacramento, CA',
-          '2000 L St, Sacramento, CA'
+          'City Hall, San Francisco, CA',
+          'Santa Monica Pier, Santa Monica, CA'
         ].map((suggestion) => (
           <button
             key={suggestion}
             onClick={() => setAddress(suggestion)}
-            className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-700 transition-colors"
+            className="text-sm px-3 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full text-gray-700 dark:text-gray-200 transition-colors"
           >
             {suggestion}
           </button>

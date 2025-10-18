@@ -33,23 +33,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Address not found' }, { status: 404 })
     }
 
-    // Filter for Sacramento area results
-    const sacramentoResults = data.filter((result: any) => {
+    // Filter for California results
+    const californiaResults = data.filter((result: any) => {
       const displayName = result.display_name.toLowerCase()
-      return (
-        displayName.includes('sacramento') &&
-        displayName.includes('california')
-      )
+      return displayName.includes('california')
     })
 
-    if (sacramentoResults.length === 0) {
+    if (californiaResults.length === 0) {
       return NextResponse.json(
-        { error: 'Please enter a Sacramento, CA address' },
+        { error: 'Please enter a California address' },
         { status: 400 }
       )
     }
 
-    const result = sacramentoResults[0]
+    const result = californiaResults[0]
 
     return NextResponse.json({
       lat: parseFloat(result.lat),

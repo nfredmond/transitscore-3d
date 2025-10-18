@@ -16,8 +16,8 @@ interface ScoreDashboardProps {
 export default function ScoreDashboard({ scores, recommendation, address }: ScoreDashboardProps) {
   if (!scores) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <p className="text-gray-500 text-center">Enter an address to see analysis</p>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors">
+        <p className="text-gray-500 dark:text-gray-400 text-center">Enter an address to see analysis</p>
       </div>
     )
   }
@@ -75,7 +75,7 @@ export default function ScoreDashboard({ scores, recommendation, address }: Scor
         return (
           <div
             key={metric.label}
-            className="bg-white rounded-xl shadow-lg p-5 hover:shadow-xl transition-shadow"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 hover:shadow-xl transition-all"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center space-x-3">
@@ -83,20 +83,20 @@ export default function ScoreDashboard({ scores, recommendation, address }: Scor
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">{metric.label}</h3>
-                  <p className="text-xs text-gray-600">{metric.description}</p>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{metric.label}</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{metric.description}</p>
                 </div>
               </div>
               <div className="text-right">
                 <div className={`text-2xl font-bold ${getScoreColor(metric.score)}`}>
                   {metric.score}
                 </div>
-                <div className="text-xs text-gray-500">{getScoreLabel(metric.score)}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{getScoreLabel(metric.score)}</div>
               </div>
             </div>
             
             {/* Progress bar */}
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
                 className={`${metric.color} h-2 rounded-full transition-all duration-500`}
                 style={{ width: `${metric.score}%` }}
@@ -109,7 +109,7 @@ export default function ScoreDashboard({ scores, recommendation, address }: Scor
       {/* AI Recommendation */}
       <div className="bg-gradient-to-br from-sacramento-blue to-sacramento-darkblue rounded-xl shadow-lg p-6 text-white">
         <div className="flex items-center space-x-2 mb-3">
-          <div className="bg-white/20 p-2 rounded-lg">
+          <div className="bg-white/20 dark:bg-white/10 p-2 rounded-lg">
             <TrendingUp className="w-5 h-5" />
           </div>
           <h3 className="font-semibold text-lg">AI Recommendation</h3>
@@ -123,7 +123,7 @@ export default function ScoreDashboard({ scores, recommendation, address }: Scor
       </div>
 
       {/* Export Button */}
-      <button className="w-full bg-sacramento-gold hover:bg-yellow-500 text-gray-900 font-semibold py-3 rounded-xl transition-colors shadow-md">
+      <button className="w-full bg-sacramento-gold hover:bg-yellow-500 dark:hover:bg-yellow-600 text-gray-900 font-semibold py-3 rounded-xl transition-colors shadow-md">
         Export Analysis
       </button>
     </div>
