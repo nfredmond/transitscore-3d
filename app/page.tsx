@@ -31,6 +31,8 @@ export default function Home() {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null)
   const [address, setAddress] = useState<string>('')
   const [amenities, setAmenities] = useState<any[]>([])
+  const [walkIsochrones, setWalkIsochrones] = useState<any>(null)
+  const [bikeIsochrones, setBikeIsochrones] = useState<any>(null)
   const [scores, setScores] = useState<{
     walkability: number
     bikeability: number
@@ -58,12 +60,16 @@ export default function Home() {
     amenities: any[]
     scores: any
     recommendation: string
+    walkIsochrones?: any
+    bikeIsochrones?: any
   }) => {
     setCoordinates({ lat: data.lat, lng: data.lng })
     setAddress(data.address)
     setAmenities(data.amenities)
     setScores(data.scores)
     setRecommendation(data.recommendation)
+    setWalkIsochrones(data.walkIsochrones)
+    setBikeIsochrones(data.bikeIsochrones)
   }
 
   return (
@@ -168,6 +174,8 @@ export default function Home() {
                   address={address}
                   amenities={amenities}
                   travelMode={travelMode}
+                  walkIsochrones={walkIsochrones}
+                  bikeIsochrones={bikeIsochrones}
                   isFullscreen={isFullscreen}
                   onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
                 />
