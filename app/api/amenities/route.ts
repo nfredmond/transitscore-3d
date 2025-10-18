@@ -17,65 +17,23 @@ export async function GET(request: NextRequest) {
     // Define search radius in meters
     const radius = 1500 // 1.5km to cover all walk times
 
-    // Enhanced Overpass API query with comprehensive transit and bikeway coverage
+    // Optimized Overpass API query - split into focused searches to avoid timeout
     const overpassQuery = `
-      [out:json][timeout:30];
+      [out:json][timeout:25];
       (
-        /* Transit - All types including small systems */
-        node["public_transport"="stop_position"](around:${radius},${lat},${lng});
-        node["public_transport"="platform"](around:${radius},${lat},${lng});
-        node["public_transport"="station"](around:${radius},${lat},${lng});
         node["highway"="bus_stop"](around:${radius},${lat},${lng});
+        node["public_transport"](around:${radius},${lat},${lng});
+        node["railway"](around:${radius},${lat},${lng});
         node["amenity"="bus_station"](around:${radius},${lat},${lng});
-        node["railway"="station"](around:${radius},${lat},${lng});
-        node["railway"="halt"](around:${radius},${lat},${lng});
-        node["railway"="tram_stop"](around:${radius},${lat},${lng});
-        node["railway"="light_rail"](around:${radius},${lat},${lng});
-        node["railway"="subway_entrance"](around:${radius},${lat},${lng});
-        node["amenity"="ferry_terminal"](around:${radius},${lat},${lng});
-        
-        /* Bikeways and Cycling Infrastructure */
-        way["highway"="cycleway"](around:${radius},${lat},${lng});
-        way["cycleway"](around:${radius},${lat},${lng});
-        way["bicycle"="designated"](around:${radius},${lat},${lng});
         node["amenity"="bicycle_parking"](around:${radius},${lat},${lng});
         node["amenity"="bicycle_rental"](around:${radius},${lat},${lng});
-        
-        /* Food & Dining */
-        node["amenity"="restaurant"](around:${radius},${lat},${lng});
-        node["amenity"="cafe"](around:${radius},${lat},${lng});
-        node["amenity"="fast_food"](around:${radius},${lat},${lng});
-        node["amenity"="bar"](around:${radius},${lat},${lng});
-        node["amenity"="pub"](around:${radius},${lat},${lng});
-        
-        /* Shopping */
-        node["shop"="supermarket"](around:${radius},${lat},${lng});
-        node["shop"="convenience"](around:${radius},${lat},${lng});
-        node["shop"="mall"](around:${radius},${lat},${lng});
-        node["shop"](around:${radius},${lat},${lng});
-        
-        /* Education */
-        node["amenity"="school"](around:${radius},${lat},${lng});
-        node["amenity"="kindergarten"](around:${radius},${lat},${lng});
-        node["amenity"="college"](around:${radius},${lat},${lng});
-        node["amenity"="university"](around:${radius},${lat},${lng});
-        node["amenity"="library"](around:${radius},${lat},${lng});
-        
-        /* Parks & Recreation */
-        node["leisure"="park"](around:${radius},${lat},${lng});
-        node["leisure"="playground"](around:${radius},${lat},${lng});
-        node["leisure"="sports_centre"](around:${radius},${lat},${lng});
-        node["leisure"="pitch"](around:${radius},${lat},${lng});
-        
-        /* Healthcare */
-        node["amenity"="pharmacy"](around:${radius},${lat},${lng});
-        node["amenity"="hospital"](around:${radius},${lat},${lng});
-        node["amenity"="clinic"](around:${radius},${lat},${lng});
-        node["amenity"="doctors"](around:${radius},${lat},${lng});
+        node["amenity"~"restaurant|cafe|fast_food|bar|pub"](around:${radius},${lat},${lng});
+        node["shop"~"supermarket|convenience|mall"](around:${radius},${lat},${lng});
+        node["amenity"~"school|kindergarten|college|university|library"](around:${radius},${lat},${lng});
+        node["leisure"~"park|playground|sports_centre|pitch"](around:${radius},${lat},${lng});
+        node["amenity"~"pharmacy|hospital|clinic|doctors"](around:${radius},${lat},${lng});
       );
       out body;
-      >;
-      out skel qt;
     `
 
     const response = await fetch('https://overpass-api.de/api/interpreter', {
@@ -87,10 +45,16 @@ export async function GET(request: NextRequest) {
     })
 
     if (!response.ok) {
-      throw new Error('Overpass API request failed')
+      console.error('Overpass API error:', response.status, response.statusText)
+      throw new Error(`Overpass API request failed: ${response.status}`)
     }
 
     const data = await response.json()
+    
+    if (!data || !data.elements) {
+      console.error('Invalid Overpass response:', data)
+      throw new Error('Invalid response from Overpass API')
+    }
 
     // Process and categorize amenities with enhanced detection
     const amenities = data.elements

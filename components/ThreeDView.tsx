@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { DeckGL } from '@deck.gl/react'
 import { Map } from 'react-map-gl'
 import { PolygonLayer } from '@deck.gl/layers'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 interface ThreeDViewProps {
   coordinates: { lat: number; lng: number }
