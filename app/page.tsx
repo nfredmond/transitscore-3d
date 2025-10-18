@@ -177,19 +177,19 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Search Bar with Wizard Option */}
         <div className="mb-6">
-          <div className="flex items-center space-x-4 mb-3">
-            <div className="flex-1">
-              <AddressSearch onAddressSelect={handleAddressSelect} />
-            </div>
+          <AddressSearch onAddressSelect={handleAddressSelect} />
+          
+          {/* Wizard Button Below Search */}
+          <div className="mt-4 flex justify-center">
             <a
               href="/wizard"
-              className="flex items-center space-x-2 px-6 py-4 bg-sacramento-gold hover:bg-yellow-500 text-gray-900 font-semibold rounded-xl transition-colors shadow-md whitespace-nowrap"
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-sacramento-gold hover:bg-yellow-500 text-gray-900 font-semibold rounded-xl transition-colors shadow-lg"
             >
               <span>🧙</span>
-              <span>Setup Wizard</span>
+              <span>Launch Setup Wizard</span>
             </a>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
             Use the wizard for comprehensive project planning with building specs and TDM programs
           </p>
         </div>
