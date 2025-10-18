@@ -250,6 +250,20 @@ export default function Home() {
       <footer className="mt-12 py-6 text-center text-gray-600 dark:text-gray-400 text-sm transition-colors">
         <p>TransitScore 3D • California Development Site Analyzer</p>
         <p className="mt-1">Powered by OpenStreetMap, Overpass API, and Claude AI</p>
+        <div className="mt-4">
+          <a
+            href="https://venmo.com/u/Nathaniel-Redmond"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center space-x-2 px-6 py-2 bg-[#008CFF] hover:bg-[#0074CC] text-white rounded-lg font-medium transition-colors shadow-md"
+          >
+            <span>💙</span>
+            <span>Support this free tool - Donate via Venmo</span>
+          </a>
+          <p className="text-xs mt-2 text-gray-500 dark:text-gray-500">
+            This tool is free to use. Support helps keep it running!
+          </p>
+        </div>
       </footer>
     </div>
   )
