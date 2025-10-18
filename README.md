@@ -1,14 +1,17 @@
 # TransitScore 3D
 
-A Sacramento development site analyzer that provides AI-powered density recommendations, walkability scores, and 3D building visualizations.
+A professional California development site analyzer providing network-based accessibility analysis, environmental impact calculations, and comprehensive scenario planning.
 
 ## Features
 
-- 🗺️ **Interactive Maps** - View sites with walkability rings and nearby amenities
-- 🏢 **3D Building Visualization** - Preview buildable envelopes with adjustable heights
-- 🤖 **AI-Powered Analysis** - Get intelligent density recommendations using Claude AI
-- 📊 **Comprehensive Scoring** - Walkability, transit access, and sustainability metrics
-- 🚌 **Transit & Amenity Data** - Real-time data from OpenStreetMap
+- 🗺️ **Network-Based Analysis** - True street network accessibility (not simple radius circles)
+- 🚶🚴 **Walk & Bike Modes** - Separate analysis for pedestrian and cycling accessibility
+- 🏢 **Scenario Planning** - Configure building characteristics and TDM programs
+- 📊 **VMT/GHG Calculations** - CARB-compliant environmental impact analysis
+- 🤖 **AI Recommendations** - Context-aware density suggestions using Claude AI
+- 📄 **Professional Reports** - Export comprehensive PDF analysis
+- 🌙 **Dark Mode** - Full dark theme support
+- 💰 **Two Tiers** - Free version with Venmo donations, Pro version with $20/month subscriptions
 
 ## Tech Stack
 
@@ -91,12 +94,28 @@ npm run dev
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Usage
+## Quick Start
 
-1. Enter a Sacramento address in the search bar
-2. View the interactive map with walkability rings and amenity markers
-3. Switch to 3D view to see building massing options
-4. Review AI-generated density recommendations and scores
+### Option 1: Quick Analysis
+1. Enter any California address
+2. Click "Analyze Site"
+3. View network-based accessibility and scores
+4. Toggle between walk and bike modes
+
+### Option 2: Comprehensive Planning (Wizard)
+1. Click "Launch Setup Wizard"
+2. Enter address (Step 1/3)
+3. Configure building characteristics (Step 2/3)
+4. Select TDM programs (Step 3/3)
+5. Get complete impact analysis with VMT/GHG calculations
+
+## Documentation
+
+- **User Guide**: `docs/USER_GUIDE.md` - How to use the application
+- **Features**: `docs/FEATURES.md` - Complete feature list
+- **Architecture**: `docs/ARCHITECTURE.md` - Technical architecture
+- **Deployment**: `docs/DEPLOYMENT.md` - Deployment instructions
+- **API**: `docs/API.md` - API reference
 
 ## Deployment
 
@@ -108,11 +127,28 @@ npm run build
 
 Deploy to Vercel and set environment variables in the dashboard.
 
-## API Endpoints
+## Versions
 
-- `/api/geocode` - Convert address to coordinates
-- `/api/amenities` - Fetch nearby amenities from Overpass API
-- `/api/analyze` - AI-powered density recommendation using Claude
+### Free Version
+- No authentication required
+- All analysis features included
+- Venmo donations: @Nathaniel-Redmond
+- URL: https://transitscore-3d.vercel.app
+
+### Pro Version  
+- Requires authentication
+- $20/month Stripe subscription
+- Priority support
+- Commercial licensing
+- Same analysis features as free
+
+## Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## License
 
@@ -121,6 +157,8 @@ MIT
 ## Acknowledgments
 
 - OpenStreetMap contributors for map data
-- Overpass API for amenity data
+- CARTO for basemap tiles
+- OpenRouteService for network routing
 - Anthropic for Claude AI
+- California Air Resources Board for VMT methodology
 

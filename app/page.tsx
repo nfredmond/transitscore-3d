@@ -107,6 +107,15 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
+              {/* Join Pro Button */}
+              <a
+                href="/auth"
+                className="flex items-center space-x-2 px-4 py-2 bg-sacramento-gold hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg transition-colors shadow-md"
+              >
+                <span>⭐</span>
+                <span>Join Pro - $20/mo</span>
+              </a>
+              
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
