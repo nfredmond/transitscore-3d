@@ -48,12 +48,12 @@ git checkout paid-version
 
 vercel deploy --prod --yes `
   -e NEXT_PUBLIC_APP_VERSION=paid `
-  -e NEXT_PUBLIC_SUPABASE_URL=https://xezwjmclbpvklojbcmaj.supabase.co `
-  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlendqbWNsYnB2a2xvamJjbWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxMzY2ODAsImV4cCI6MjA1OTcxMjY4MH0.5aVrcOOO3oDtKdjX2UbrXfUiQLfnNThNn2bRGOnLdUM `
-  -e ANTHROPIC_API_KEY=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 `
-  -e NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY_HERE `
-  -e STRIPE_SECRET_KEY=YOUR_SECRET_KEY_HERE `
-  -e STRIPE_WEBHOOK_SECRET=YOUR_WEBHOOK_SECRET_HERE
+  -e NEXT_PUBLIC_SUPABASE_URL=<your_supabase_url> `
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=<your_supabase_anon_key> `
+  -e ANTHROPIC_API_KEY=<your_anthropic_key> `
+  -e NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=<pk_live_from_stripe_dashboard> `
+  -e STRIPE_SECRET_KEY=<sk_live_from_stripe_dashboard> `
+  -e STRIPE_WEBHOOK_SECRET=<whsec_from_stripe_webhook>
 ```
 
 ---
